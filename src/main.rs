@@ -18,7 +18,8 @@ async fn run_server() -> std::io::Result<()> {
             .wrap_api()
             .service(default_endpoint)
             .wrap(Logger::default())
-            .with_json_spec_v3_at("/api/spec/v3")
+            .with_json_spec_at("/api/spec/v3")
+            .with_swagger_ui_at("/docs")
             .build()
     })
     .bind("127.0.0.1:8080")?
