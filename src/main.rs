@@ -1,18 +1,35 @@
-use client::Client;
-use reqwest::Url;
+use actix_web::{middleware::Logger, App, HttpServer};
+use app::api::default_endpoint;
+use env_logger::Env;
+use log::info;
+use paperclip::actix::OpenApiExt;
 
-mod client;
+mod app;
 
-// TODO: Use environment variables here
-const ROUTER_URL: &'static str = "https://192.168.88.1";
-const USERNAME: &'static str = "admin";
-const PASSWORD: &'static str = "";
+const APP_PORT: u16 = 8080;
 
-fn main() {
-    let mikrotik_client = Client::new(
-        Url::parse(ROUTER_URL).unwrap(),
-        USERNAME.to_string(),
-        PASSWORD.to_string(),
-        true,
-    );
+fn initialize_logger() {
+    env_logger::init_from_env(Env::default().default_filter_or("info"));
+}
+
+async fn run_server() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        App::new()
+            .wrap_api()
+            .service(default_endpoint)
+            .wrap(Logger::default())
+            .with_json_spec_v3_at("/api/spec/v3")
+            .build()
+    })
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    initialize_logger();
+
+    info!("Starting web server at 0.0.0.0:{}", APP_PORT);
+    run_server().await
 }
