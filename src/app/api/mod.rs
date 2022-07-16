@@ -1,3 +1,4 @@
+pub mod log;
 pub mod system;
 
 use actix_web::Error;

@@ -17,12 +17,13 @@ async fn run_server() -> std::io::Result<()> {
         App::new()
             .wrap_api()
             .service(default_endpoint)
+            .service(app::api::log::controller::get_logs)
             .wrap(Logger::default())
-            .with_json_spec_at("/api/spec/v3")
+            .with_json_spec_at("/openapi.json")
             .with_swagger_ui_at("/docs")
             .build()
     })
-    .bind("127.0.0.1:8080")?
+    .bind("0.0.0.0:8080")?
     .run()
     .await
 }
@@ -30,7 +31,6 @@ async fn run_server() -> std::io::Result<()> {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     initialize_logger();
-
     info!("Starting web server at 0.0.0.0:{}", APP_PORT);
     run_server().await
 }
